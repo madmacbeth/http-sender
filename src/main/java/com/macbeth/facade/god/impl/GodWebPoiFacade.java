@@ -47,19 +47,15 @@ public class GodWebPoiFacade extends GodWebApiFacade {
 
         Integer page = this.godWebPoiWebPlatformApi.getPage();
 
-        for (;;) {
-            if (Objects.isNull(page) && this.page.compareAndSet(0, 1)) {
-                this.godWebPoiWebPlatformApi.setPage(this.page.get());
-                page = this.page.get();
-                break;
-            } else if (this.page.compareAndSet(page.intValue(), page.intValue() + 1)) {
-                this.godWebPoiWebPlatformApi.setPage(this.page.get());
-                break;
-            }
-            page = this.godWebPoiWebPlatformApi.getPage();
+        if (Objects.isNull(page)) {
+            page = 1;
+            this.page.set(1);
+            this.godWebPoiWebPlatformApi.setPage(1);
+        } else {
+            this.page.set(page + 1);
+            this.godWebPoiWebPlatformApi.setPage(this.page.get());
         }
 
-        System.out.println(page);
         Response response = super.getResponse();
 
         if (response.getCode().intValue() != 200) {
@@ -104,7 +100,7 @@ public class GodWebPoiFacade extends GodWebApiFacade {
         }
 
         @Override
-        public List<Response> call() throws Exception {
+        public List<Response> call() {
             final List<Response> responses = this.facade.getAll();
             return responses;
         }
@@ -118,7 +114,7 @@ public class GodWebPoiFacade extends GodWebApiFacade {
         @Override
         public List<Response> call() throws Exception {
             final List<Response> responses = future.get();
-//            responses.stream().map(Response::getContent).forEach(System.out::println);
+            responses.stream().map(Response::getContent).forEach(System.out::println);
             return null;
         }
     }

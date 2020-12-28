@@ -74,27 +74,16 @@ public class GodWebPoiFacadeTest {
         List<Response> responses = Lists.newArrayList();
         TaskManager.ProducerTaskGroup producerTaskGroup = null;
         for (int i = 0; i < godWebPoiFacades.size(); i++) {
-            for (int j = 0; j < godWebPoiFacades.size(); j++) {
-                final GodWebPoiFacade facade = godWebPoiFacades.get(j);
-                final GodWebPoiFacade.GodWebPoiProducerTask producerTask = new GodWebPoiFacade.GodWebPoiProducerTask(facade, responses);
-                producerTaskGroup = TaskManager.addProducerTask("godPoiProducerTask", producerTask);
-            }
+            final GodWebPoiFacade facade = godWebPoiFacades.get(i);
+            final GodWebPoiFacade.GodWebPoiProducerTask producerTask = new GodWebPoiFacade.GodWebPoiProducerTask(facade, responses);
+            producerTaskGroup = TaskManager.addProducerTask("godPoiProducerTask", producerTask);
         }
-        final List<Future> futures = producerTaskGroup.getFutures();
-        System.out.println(futures.size());
-        for (Future<List<Response>> future : futures) {
-            if (Objects.isNull(future)) {
-                System.out.println("为null");
-                continue;
-            }
-//            TaskManager.addConsumerTask("godPoiConsumerTask", new GodWebPoiFacade.PoiConsumerTask(future));
-            final List<Response> responseList = future.get();
-//            responseList.stream().map(Response::getContent).forEach(System.out::println);
+        for (Future<List<Response>> future : producerTaskGroup.getFutures()) {
+            TaskManager.addConsumerTask("godPoiConsumerTask", new GodWebPoiFacade.PoiConsumerTask(future));
         }
 
-//        while(! producerTaskGroup.isFinished()) {
-//            TimeUnit.SECONDS.sleep(10);
-//        }
+        TimeUnit.SECONDS.sleep(10);
+
     }
 
 
